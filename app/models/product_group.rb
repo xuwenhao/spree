@@ -121,7 +121,7 @@ class ProductGroup < ActiveRecord::Base
   # Does the final ordering if requested
   # TODO: move the order stuff out of the above - is superfluous now
   def products(use_order = true)
-    cached_group = Product.in_cached_group(self)	
+    cached_group = Product.in_cached_groups(self)	
     if cached_group.limit(1).blank?
       dynamic_products(use_order)
     elsif !use_order
@@ -172,9 +172,12 @@ class ProductGroup < ActiveRecord::Base
     ActiveRecord::Base.connection.execute "DELETE FROM product_groups_products WHERE product_group_id = #{self.id}"
 
     # and generate the new group entirely in SQL
-    ActiveRecord::Base.connection.execute "INSERT INTO product_groups_products #{dynamic_products(false).scoped(:select => "products.id, #{self.id}").to_sql}"
+    insert_list = Product.scoped(dynamic_products(false).scope(:find).merge :select => "distinct(products.id), #{self.id}")
+    puts "GOT = #{insert_list.to_sql}"
+    ActiveRecord::Base.connection.execute "INSERT INTO product_groups_products #{insert_list.to_sql}"
   end
 
+# TODO: fix with duplicates
   def generate_preview(size = Spree::Config[:admin_pgroup_preview_size])
     count = self.class.count_by_sql ["SELECT COUNT(*) FROM product_groups_products WHERE product_groups_products.product_group_id = ?", self]
 

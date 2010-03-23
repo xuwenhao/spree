@@ -74,15 +74,21 @@ module Scopes::Product
   #
   #   Product.taxons_id_eq([x,y])
   #
-  Product.named_scope :in_taxons, lambda {|*taxons|
+  # TODO: compact lft/rgt ranges
+  Product.named_scope :in_taxons_dynamic, lambda {|*taxons|
     taxons = get_taxons(taxons)
     taxons.first ? prepare_taxon_conditions(taxons) : {}
   }
+  # direct look at cached groups
+  Product.named_scope :in_taxons, lambda {|*taxons|
+    taxons = get_taxons(taxons)
+    Product.in_cached_groups(taxons.map &:product_group).scope :find
+  }
 
-  # for quick access to products in a group, WITHOUT using the association mechanism
-  Product.named_scope :in_cached_group, lambda {|product_group| 
+  # for quick access to products in group(s), WITHOUT using the association mechanism
+  Product.named_scope :in_cached_groups, lambda {|*product_groups| 
     { :joins => "JOIN product_groups_products ON products.id = product_groups_products.product_id", 
-      :conditions => ["product_groups_products.product_group_id = ?", product_group] 
+      :conditions => ["product_groups_products.product_group_id in (?)", [product_groups].flatten] 
     }
   }
 
@@ -238,9 +244,9 @@ SQL
     conditions[0] = "("+conditions[0].join(") OR (")+")"
 
     {
-      :joins => :taxons,
-      ## :order => taxons.empty? ? nil : taxons.first.self_and_descendants.scope(:find)[:order],
+      :joins      => :taxons,
       :conditions => conditions,
+      :select     => "DISTINCT products.*"
     }
   end
 end

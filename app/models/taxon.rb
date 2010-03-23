@@ -6,6 +6,22 @@ class Taxon < ActiveRecord::Base
   before_create :set_permalink
   before_save :ensure_trailing_slash
 
+  belongs_to :product_group
+  before_save :update_product_group if ProductGroup.table_exists?
+
+
+# WANT: to cascade down to children, to avoid recalculation needlessly
+# but this means having to carefully do the merges...
+# avoid for now? 'cos it comes down to nice table slices 
+  def update_product_group
+    if self.product_group.nil?
+      self.product_group = ProductGroup.create :name => ("taxons:" + permalink)	# nb extra cost
+      scope = ProductScope.create :name => "in_taxons_dynamic", :arguments => [self.id]
+      self.product_group.product_scopes = [scope]
+    end
+    self.product_group.save
+  end
+
   # indicate which filters should be used for a taxon
   # this method should be customized to your own site
   include ::ProductFilters  # for detailed defs of filters
