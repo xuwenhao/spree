@@ -16,6 +16,11 @@ gem 'rd_awesome_nested_set', :require => ["awesome_nested_set"]
 
 gem "spree_sample", :path => "../sample", :require => ['spree_sample','spree_sample/engine']
 
+# test stuff
+gem 'rspec', '2.0.0.beta.19'
+gem 'rspec-rails', '2.0.0.beta.19'
+gem 'fabrication'
+
 application "require 'spree_core/all'"
 remove_file "public/index.html"
 
