@@ -60,7 +60,7 @@ class Order < ActiveRecord::Base
   # end
 
   def complete?
-    completed_at
+    !! completed_at
   end
 
   # order state machine (see http://github.com/pluginaweek/state_machine/tree/master for details)
