@@ -326,11 +326,9 @@ class Order < ActiveRecord::Base
     adjustments.each(&:update_amount)
   end
 
-
   def destroy_inapplicable_adjustments
-    applicable_adjustments, adjustments_to_destroy = adjustments.partition{|a| a.applicable?}
-    self.adjustments = applicable_adjustments
-    adjustments_to_destroy.each(&:destroy)
+    destroyed = adjustments.reject(&:applicable?).map(&:destroy)
+    adjustments.reload if destroyed.any?
   end
 
   def update_totals!
