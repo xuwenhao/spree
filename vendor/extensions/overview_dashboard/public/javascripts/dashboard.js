@@ -32,7 +32,7 @@ jQuery(document).ready(function(){
 	
 		orders_by_day_settings.axes.yaxis.label = jQuery("#orders_by_day_value :selected").val();
 
-		jQuery("#order_by_day_title").text(orders + " " + jQuery("#orders_by_day_value :selected").val() + " " + by_day + " (" + jQuery("#orders_by_day_reports :selected").text() + ")");
+		jQuery("#order_by_day_title").text(orders + " " + jQuery("#orders_by_day_value :selected").text() + " " + by_day + " (" + jQuery("#orders_by_day_reports :selected").text() + ")");
 
 		$('#orders_by_day').empty();
 		$.jqplot('orders_by_day', new_points, orders_by_day_settings);
