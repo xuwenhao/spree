@@ -47,9 +47,9 @@ class Admin::VariantsController < Admin::BaseController
     @deleted =  (params.key?(:deleted)  && params[:deleted] == "on") ? "checked" : ""
     
     if @deleted.blank?
-      @collection ||= end_of_association_chain.active.find(:all)
+      @collection ||= Variant.active.find(:all, :conditions => ['product_id = ? and is_master = ?', @product.id, false])
     else
-      @collection ||= end_of_association_chain.deleted.find(:all)
+      @collection ||= Variant.deleted.find(:all, :conditions => ['product_id = ? and is_master = ?', @product.id, false])
     end
   end
 end
